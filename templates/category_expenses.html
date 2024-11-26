@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Expenses</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Total Expenses by Category</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total Expense</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in category_expenses %}
+                <tr>
+                    <td>{{ category.category_name }}</td>
+                    <td>${{ "%.2f"|format(category.total_expense or 0) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html> 

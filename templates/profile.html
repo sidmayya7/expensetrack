@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .back-button {
+            background-color: #666;
+            margin-top: 10px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .logout-button {
+            background-color: #dc3545;  /* Red color for logout */
+            margin-top: 10px;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        .admin-button {
+            background-color: #007bff;
+            margin-top: 20px;
+        }
+
+        .admin-button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .user-list table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-list th, .user-list td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-header">
+            <h1>Profile</h1>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="profile-details">
+            <h2>User Details</h2>
+            <p><strong>Username:</strong> {{ username }}</p>
+            
+            <h3>Change Password</h3>
+            <form action="/change_password" method="POST">
+                <div class="form-group">
+                    <label for="new_password">New Password:</label>
+                    <input type="password" id="new_password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                <button type="submit">Change Password</button>
+            </form>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="back-button" onclick="window.location.href='/home'">Back to Home</button>
+            <button class="logout-button" onclick="window.location.href='/logout'">Log Out</button>
+        </div>
+        
+        {% if is_admin %}
+        <div class="admin-section">
+            <h2>Admin Controls</h2>
+            <button class="admin-button" onclick="openUserManagementModal()">Manage Users</button>
+        </div>
+
+        <div id="userManagementModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeUserManagementModal()">&times;</span>
+                <h2>User Management</h2>
+                <div class="user-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            {% if user.Username != username %}  <!-- Don't show delete button for current admin -->
+                            <tr>
+                                <td>{{ user.Username }}</td>
+                                <td>
+                                    <button class="delete-btn" onclick="confirmDeleteUser('{{ user.Username }}')">Delete</button>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Password confirmation validation
+        document.querySelector('form').onsubmit = function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+            return true;
+        };
+
+        function openUserManagementModal() {
+            document.getElementById('userManagementModal').style.display = 'block';
+        }
+
+        function closeUserManagementModal() {
+            document.getElementById('userManagementModal').style.display = 'none';
+        }
+
+        function confirmDeleteUser(username) {
+            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+                window.location.href = `/delete_user/${username}`;
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

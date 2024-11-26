@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            color: #721c24;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3em;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .boxes-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .box {
+            flex: 1;
+            max-width: 400px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+
+        .close:hover {
+            color: black;
+        }
+
+
+        .category-group {
+            display: flex;
+            align-items: flex-end;  /* Changed from align-items: center */
+            gap: 5px;  /* Added gap for consistent spacing */
+        }
+
+        .add-button, .delete-button {
+            height: 35px;  /* Match the height of your input boxes */
+            margin-bottom: 1px;  /* Fine-tune alignment if needed */
+            padding: 0 10px;  /* Adjust padding to make buttons square */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-right-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .tables-container {
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .table-section {
+            margin-bottom: 20px;
+        }
+
+        .table-header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 4px;
+        }
+
+        .table-header h3 {
+            margin: 0;
+        }
+
+        .table-content {
+            display: none;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+
+        .table-header.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #da190b;
+        }
+
+        /* Optional: Make the category select container take up remaining space */
+        .category-select-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+            <button class="add-button" onclick="window.location.href='/accounts'">Accounts</button>
+            <button class="add-button" onclick="window.location.href='/budgets'">Budgets</button>
+            <button class="add-button" onclick="window.location.href='/profile'">Profile</button>
+            <button class="add-button" onclick="window.location.href='/category_expenses'">Category Expenses</button>
+        </div>
+        <h1 class="title">ExpenseTrack</h1>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="boxes-container">
+            <div class="box">
+                <h2>Add Income</h2>
+                <form action="/add_income" method="POST">
+                    <div class="form-group">
+                        <label for="income_amount">Amount:</label>
+                        <input type="number" id="income_amount" name="amount" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="income_date">Date:</label>
+                        <input type="datetime-local" id="income_date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="income_account">Account:</label>
+                        <select id="income_account" name="account_id" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.account_id }}">{{ account.account_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit">Add Income</button>
+                </form>
+            </div>
+
+            <div class="box">
+                <h2>Add Expense</h2>
+                <form action="/add_expense" method="POST">
+                    <div class="form-group">
+                        <label for="expense_amount">Amount:</label>
+                        <input type="number" id="expense_amount" name="amount" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="category-group">
+                            <div class="category-select-container">
+                                <label for="expense_category">Category:</label>
+                                <select id="expense_category" name="category_id" required>
+                                    {% for category in categories %}
+                                    <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="button" class="add-button" onclick="openCategoryModal()">+</button>
+                            <button type="button" class="delete-button" onclick="openDeleteCategoryModal()">-</button>
+                        </div>
+                    </div>
+
+
+
+
+                    <div class="form-group">
+                        <label for="expense_date">Date:</label>
+                        <input type="datetime-local" id="expense_date" name="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense_account">Account:</label>
+                        <select id="expense_account" name="account_id" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.account_id }}">{{ account.account_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+        </div>
+        <div class="tables-container">
+            <div class="table-section">
+                <div class="table-header" onclick="toggleTable('income-table')">
+                    <h3>Recent Income</h3>
+                    <input type="number" id="income-limit" value="5" min="1" max="50"
+                        onchange="updateIncomeTable(this.value)">
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div id="income-table" class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Account</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for income in incomes %}
+                            <tr>
+                                <td>{{ income.date }}</td>
+                                <td>${{ "%.2f"|format(income.amount) }}</td>
+                                <td>{{ income.account_name }}</td>
+                                <td>
+                                    <button onclick='openEditIncomeModal({
+                                        "income_id": {{ income.income_id }},
+                                        "amount": {{ income.amount }},
+                                        "date": "{{ income.date }}"
+                                    })' class="edit-btn">Edit</button>
+                                    <button onclick="confirmDeleteIncome({{ income.income_id }})"
+                                        class="delete-btn">Delete</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="table-section">
+                <div class="table-header" onclick="toggleTable('expense-table')">
+                    <h3>Recent Expenses</h3>
+                    <input type="number" id="expense-limit" value="5" min="1" max="50"
+                        onchange="updateExpenseTable(this.value)">
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div id="expense-table" class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Category</th>
+                                <th>Account</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expenses %}
+                            <tr>
+                                <td>{{ expense.date }}</td>
+                                <td>${{ "%.2f"|format(expense.amount) }}</td>
+                                <td>{{ expense.category_name }}</td>
+                                <td>{{ expense.account_name }}</td>
+                                <td>
+                                    <button onclick='openEditExpenseModal({
+                                        "expense_id": {{ expense.expense_id }},
+                                        "amount": {{ expense.amount }},
+                                        "category_id": {{ expense.category_id }},
+                                        "date": "{{ expense.date }}"
+                                    })' class="edit-btn">Edit</button>
+                                    <button onclick="confirmDeleteExpense({{ expense.expense_id }})"
+                                        class="delete-btn">Delete</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="categoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeCategoryModal()">&times;</span>
+                <h2>Add New Category</h2>
+                <form action="/add_category" method="POST">
+                    <div class="form-group">
+                        <label for="category_name">Category Name:</label>
+                        <input type="text" id="category_name" name="category_name" required>
+                    </div>
+                    <button type="submit">Add Category</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Income Modal -->
+        <div id="editIncomeModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditIncomeModal()">&times;</span>
+                <h2>Edit Income</h2>
+                <form action="/edit_income" method="POST">
+                    <input type="hidden" id="edit_income_id" name="income_id">
+                    <div class="form-group">
+                        <label for="edit_income_amount">Amount:</label>
+                        <input type="number" id="edit_income_amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_income_date">Date:</label>
+                        <input type="datetime-local" id="edit_income_date" name="date" required>
+                    </div>
+                    <button type="submit">Update Income</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Edit Expense Modal -->
+        <!-- Edit Expense Modal -->
+        <div id="editExpenseModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditExpenseModal()">&times;</span>
+                <h2>Edit Expense</h2>
+                <form action="/edit_expense" method="POST">
+                    <input type="hidden" id="edit_expense_id" name="expense_id">
+                    <div class="form-group">
+                        <label for="edit_expense_amount">Amount:</label>
+                        <input type="number" id="edit_expense_amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_expense_category">Category:</label>
+                        <select id="edit_expense_category" name="category_id" required>
+                            {% for category in categories %}
+                            <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_expense_date">Date:</label>
+                        <input type="datetime-local" id="edit_expense_date" name="date" required>
+                    </div>
+                    <button type="submit">Update Expense</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Delete Category Modal -->
+        <div id="deleteCategoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeDeleteCategoryModal()">&times;</span>
+                <h2>Delete Category</h2>
+                <form action="/delete_category" method="POST">
+                    <div class="form-group">
+                        <label for="delete_category">Select Category to Delete:</label>
+                        <select id="delete_category" name="category_id" required>
+                            {% for category in categories %}
+                            <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="delete-btn">Delete Category</button>
+                </form>
+            </div>
+        </div>
+
+
+
+        <!-- Account Modal -->
+        <div id="accountModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAccountModal()">&times;</span>
+                <h2>Add New Account</h2>
+                <form action="/add_account" method="POST">
+                    <div class="form-group">
+                        <label for="account_name">Account Name:</label>
+                        <input type="text" id="account_name" name="account_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="initial_balance">Initial Balance:</label>
+                        <input type="number" id="initial_balance" name="balance" step="0.01" required>
+                    </div>
+                    <button type="submit">Add Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        function openCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'block';
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+
+        function openAccountModal() {
+            document.getElementById('accountModal').style.display = 'block';
+        }
+
+        function closeAccountModal() {
+            document.getElementById('accountModal').style.display = 'none';
+        }
+
+        function toggleTable(tableId) {
+            const content = document.getElementById(tableId);
+            const header = content.previousElementSibling;
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            header.classList.toggle('active');
+        }
+
+        function openEditIncomeModal(income) {
+            console.log('Opening edit income modal:', income); // Debug line
+            document.getElementById('edit_income_id').value = income.income_id;
+            document.getElementById('edit_income_amount').value = income.amount;
+            document.getElementById('edit_income_date').value = income.date;
+            document.getElementById('editIncomeModal').style.display = 'block';
+        }
+
+        function openEditExpenseModal(expense) {
+            console.log('Opening edit expense modal:', expense); // Debug line
+            document.getElementById('edit_expense_id').value = expense.expense_id;
+            document.getElementById('edit_expense_amount').value = expense.amount;
+            document.getElementById('edit_expense_category').value = expense.category_id;
+            document.getElementById('edit_expense_date').value = expense.date;
+            document.getElementById('editExpenseModal').style.display = 'block';
+        }
+
+        // Update the formatDateTime function if needed
+        function formatDateTime(timeStr) {
+            // If you need to format the time string further, do it here
+            return timeStr;
+        }
+
+
+        function closeEditIncomeModal() {
+            document.getElementById('editIncomeModal').style.display = 'none';
+        }
+
+        function closeEditExpenseModal() {
+            document.getElementById('editExpenseModal').style.display = 'none';
+        }
+
+        function confirmDeleteIncome(incomeId) {
+            if (confirm('Are you sure you want to delete this income?')) {
+                window.location.href = `/remove_income/${incomeId}`;
+            }
+        }
+
+        function confirmDeleteExpense(expenseId) {
+            if (confirm('Are you sure you want to delete this expense?')) {
+                window.location.href = `/remove_expense/${expenseId}`;
+            }
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toISOString().slice(0, 16);
+        }
+
+        function updateIncomeTable(limit) {
+            window.location.href = `/home?income_limit=${limit}`;
+        }
+
+        function updateExpenseTable(limit) {
+            window.location.href = `/home?expense_limit=${limit}`;
+        }
+
+        function openDeleteCategoryModal() {
+            document.getElementById('deleteCategoryModal').style.display = 'block';
+        }
+
+        function closeDeleteCategoryModal() {
+            document.getElementById('deleteCategoryModal').style.display = 'none';
+        }
+
+
+        // Close modals when clicking outside
+        window.onclick = function (event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>

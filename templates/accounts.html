@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accounts</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .add-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background-color: #45a049;
+        }
+
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .account-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .account-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .account-balance {
+            font-size: 1.5em;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .back-button {
+            background-color: #666;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            color: #721c24;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .edit-btn {
+            background-color: #ffc107;
+            color: black;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .edit-btn:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-button" onclick="window.location.href='/home'">Back to Home</button>
+            <h1>Accounts</h1>
+            <button class="add-button" onclick="openAccountModal()">Add New Account</button>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="accounts-grid">
+            {% for account in accounts %}
+            <div class="account-card">
+                <div class="account-name">{{ account.account_name }}</div>
+                <div class="account-balance">${{ "%.2f"|format(account.balance) }}</div>
+                <div class="account-stats">
+                    <p>Total Income: ${{ "%.2f"|format(account.total_income or 0) }}</p>
+                    <p>Total Expenses: ${{ "%.2f"|format(account.total_expenses or 0) }}</p>
+                </div>
+                <div class="button-group">
+                    <button class="edit-btn" onclick="openEditAccountModal({{ account.account_id }}, '{{ account.account_name }}', {{ account.balance }})">Edit Account</button>
+                    <button class="delete-btn" onclick="confirmDeleteAccount({{ account.account_id }}, '{{ account.account_name }}')">Delete Account</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Account Modal -->
+        <div id="accountModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAccountModal()">&times;</span>
+                <h2>Add New Account</h2>
+                <form action="/add_account" method="POST">
+                    <div class="form-group">
+                        <label for="account_name">Account Name:</label>
+                        <input type="text" id="account_name" name="account_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="initial_balance">Initial Balance:</label>
+                        <input type="number" id="initial_balance" name="balance" step="0.01" required>
+                    </div>
+                    <button type="submit" class="add-button">Add Account</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Edit Account Modal -->
+        <div id="editAccountModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditAccountModal()">&times;</span>
+                <h2>Edit Account</h2>
+                <form action="/edit_account" method="POST">
+                    <input type="hidden" id="edit_account_id" name="account_id">
+                    <div class="form-group">
+                        <label for="edit_account_name">Account Name:</label>
+                        <input type="text" id="edit_account_name" name="account_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_balance">Balance:</label>
+                        <input type="number" id="edit_balance" name="balance" step="0.01" required>
+                    </div>
+                    <button type="submit" class="edit-btn">Update Account</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openAccountModal() {
+            document.getElementById('accountModal').style.display = 'block';
+        }
+
+        function closeAccountModal() {
+            document.getElementById('accountModal').style.display = 'none';
+        }
+
+        function confirmDeleteAccount(accountId, accountName) {
+            if (confirm(`Are you sure you want to delete account "${accountName}"? This will also delete all related transactions.`)) {
+                window.location.href = `/remove_account/${accountId}`;
+            }
+        }
+        function openEditAccountModal(accountId, accountName, balance) {
+            document.getElementById('edit_account_id').value = accountId;
+            document.getElementById('edit_account_name').value = accountName;
+            document.getElementById('edit_balance').value = balance;
+            document.getElementById('editAccountModal').style.display = 'block';
+        }
+
+        function closeEditAccountModal() {
+            document.getElementById('editAccountModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
